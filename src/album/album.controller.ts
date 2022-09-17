@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   ValidationPipe,
   Patch,
+  Put
 } from '@nestjs/common';
 
 import { AlbumService } from './album.service';
@@ -30,7 +31,7 @@ export class AlbumController {
     return this.albumService.createAlbum(body);
   }
 
-  @Patch('/:id')
+  @Put('/:id')
   updateAlbum(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateAlbumDto,
