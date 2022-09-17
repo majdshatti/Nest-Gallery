@@ -1,29 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { Album } from './album.model';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Album } from './album.entity';
+import { AlbumRepositroy } from './album.repository';
 import { CreateAlbumDto } from './dto/create-album.dto';
-import { v1 as uuid } from 'uuid';
+import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
-  private albums: Album[] = [];
+  async getAlbumById(id: number): Promise<Album> {
+    const album = await AlbumRepositroy.findOneBy({ id });
 
-  getAllAlbums(): Album[] {
-    return this.albums;
-  }
-
-  createAlbum(createAlbumDto: CreateAlbumDto): Album {
-    const { name, description, isPrivate, image } = createAlbumDto;
-
-    const album: Album = {
-      id: uuid(),
-      name,
-      description,
-      image,
-      isPrivate,
-    };
-
-    this.albums.push(album);
+    if (!album) {
+      throw new NotFoundException(`${id} does not exist.`);
+    }
 
     return album;
+  }
+
+  async createAlbum(body: CreateAlbumDto): Promise<Album> {
+    return AlbumRepositroy.createAlbum(body);
+  }
+
+  async updateAlbum(id: number, body: UpdateAlbumDto): Promise<Album> {
+    const album = await AlbumRepositroy.findOneBy({ id });
+
+    if (!album) {
+      throw new NotFoundException(`${id} does not exist.`);
+    }
+
+    return AlbumRepositroy.updateAlbum(album, body);
   }
 }
