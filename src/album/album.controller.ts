@@ -13,20 +13,20 @@ import {
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { AlbumEntity } from './album.entity';
+import { Album } from './album.entity';
 
 @Controller('album')
 export class AlbumController {
   constructor(private albumService: AlbumService) {}
 
   @Get('/:id')
-  getAlbumById(@Param('id', ParseIntPipe) id: number): Promise<AlbumEntity> {
+  getAlbumById(@Param('id', ParseIntPipe) id: number): Promise<Album> {
     return this.albumService.getAlbumById(id);
   }
 
   @Post()
   @UsePipes(ValidationPipe)
-  createAlbum(@Body() body: CreateAlbumDto): Promise<AlbumEntity> {
+  createAlbum(@Body() body: CreateAlbumDto): Promise<Album> {
     return this.albumService.createAlbum(body);
   }
 
@@ -34,7 +34,7 @@ export class AlbumController {
   updateAlbum(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateAlbumDto,
-  ): Promise<AlbumEntity> {
+  ): Promise<Album> {
     return this.albumService.updateAlbum(id, body);
   }
 }
