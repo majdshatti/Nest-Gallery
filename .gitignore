@@ -1,7 +1,9 @@
 # compiled output
 /dist
 /node_modules
-src/config/typeorm.config.ts
+
+# Conifg
+.env
 
 # Logs
 logs
