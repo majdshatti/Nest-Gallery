@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+// Entity
 import { Album } from './album.entity';
+// Repositoy
 import { AlbumRepositroy } from './album.repository';
-import { CreateAlbumDto } from './dto/create-album.dto';
-import { FilterAlbumDto } from './dto/filter-album.dto';
-import { UpdateAlbumDto } from './dto/update-album.dto';
+// Data Transfer Objects
+import { CreateAlbumDto, FilterAlbumDto, UpdateAlbumDto } from './dto/';
 
 @Injectable()
 export class AlbumService {
