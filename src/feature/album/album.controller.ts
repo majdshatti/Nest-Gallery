@@ -8,7 +8,9 @@ import {
   ParseIntPipe,
   ValidationPipe,
   Put,
-  Delete,Query
+  Delete,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 
 import { AlbumService } from './album.service';
@@ -16,13 +18,17 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Album } from './album.entity';
 import { FilterAlbumDto } from './dto/filter-album.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('album')
+@UseGuards(AuthGuard())
 export class AlbumController {
   constructor(private albumService: AlbumService) {}
 
   @Get()
-  getAlbums(@Query(ValidationPipe) filterAlbumDto: FilterAlbumDto): Promise<Album[]> {
+  getAlbums(
+    @Query(ValidationPipe) filterAlbumDto: FilterAlbumDto,
+  ): Promise<Album[]> {
     return this.albumService.getAlbums(filterAlbumDto);
   }
 
