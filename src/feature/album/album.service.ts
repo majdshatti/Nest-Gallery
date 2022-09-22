@@ -5,7 +5,7 @@ import { Album } from './album.entity';
 // Repositoy
 import { AlbumRepositroy } from './album.repository';
 // Data Transfer Objects
-import { CreateAlbumDto, FilterAlbumDto, UpdateAlbumDto } from './dto/';
+import { CreateAlbumDto, FilterAlbumDto, UpdateAlbumDto } from './dto';
 
 @Injectable()
 export class AlbumService {

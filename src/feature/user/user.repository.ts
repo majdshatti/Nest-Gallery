@@ -28,6 +28,12 @@ export const UserRepositroy = AppDataSource.manager.getRepository(User).extend({
     return user.save();
   },
 
+  /**
+   * Get a user by username
+   *
+   * @param username string
+   * @returns Promise<User>
+   */
   async getUserByUsername(username: string): Promise<User> {
     return await this.findOneBy({ username });
   },

@@ -1,8 +1,12 @@
+// Nest
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+// Controller
+import { AuthController } from './auth.controller';
+// Service
+import { AuthService } from './auth.service';
+// JWT Strategy
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({

@@ -1,10 +1,19 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
+// Nest
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+// Passport
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+// DataSource
 import { AppDataSource } from 'src/database/dataSource';
-import { IPayload } from './interfaces/payload.interface';
+// Entity
 import { User } from '../user';
+// Interface
+import { IPayload } from './interfaces/payload.interface';
 
+/**
+ * JWT Strategy
+ * @class
+ */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {

@@ -1,5 +1,7 @@
-import { Album } from './album.entity';
+// DataSource
 import { AppDataSource } from 'src/database/dataSource';
+// Entity
+import { Album } from './album.entity';
 // Data transfer objects
 import { CreateAlbumDto, UpdateAlbumDto, FilterAlbumDto } from './dto/';
 
@@ -15,8 +17,10 @@ export const AlbumRepositroy = AppDataSource.manager
     async getAlbums(filterAlbumDto: FilterAlbumDto): Promise<Album[]> {
       const { name, search, isPrivate } = filterAlbumDto;
 
+      // Init query builder
       const queryBuilder = this.createQueryBuilder('album');
 
+      // Check if name or description is passed as a query
       if (name)
         queryBuilder.andWhere(`album.name LIKE :name`, { name: `%${name}%` });
 
@@ -26,6 +30,7 @@ export const AlbumRepositroy = AppDataSource.manager
           { search: `%${search}%` },
         );
 
+      // Return all filtered albums
       return queryBuilder.getMany();
     },
 
@@ -44,8 +49,7 @@ export const AlbumRepositroy = AppDataSource.manager
       album.isPrivate = isPrivate;
       album.image = image;
 
-      await album.save();
-      return album;
+      return await album.save();
     },
 
     /**
@@ -62,7 +66,6 @@ export const AlbumRepositroy = AppDataSource.manager
       album.isPrivate = isPrivate ?? album.isPrivate;
       album.image = image ?? album.image;
 
-      await album.save();
-      return album;
+      return await album.save();
     },
   });
