@@ -1,6 +1,9 @@
+// Typeorm
 import { DataSource } from 'typeorm';
+// Datasource options
 import { dataSourceOptions } from './dataSourceOptions';
 
+// Initializing DataSource
 export const AppDataSource = new DataSource(dataSourceOptions);
 
 AppDataSource.initialize()

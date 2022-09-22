@@ -1,8 +1,14 @@
+// Typeorm
 import { DataSourceOptions } from 'typeorm';
+// Environment variables (congigs)
 import * as dotenv from 'dotenv';
-
 dotenv.config();
 
+/**
+ * Datasource of database connection
+ *
+ * @constant
+ */
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   host: process.env.DATABASE_HOST,
