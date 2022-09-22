@@ -1,8 +1,16 @@
+// Nest
 import { Module } from '@nestjs/common';
-import configuration from './configuration';
-import { AppConfigService } from './config.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+// Service
+import { AppConfigService } from './config.service';
+// Configs
+import configuration from './configuration';
 
+/**
+ * Application configurations module
+ *
+ * @module
+ */
 @Module({
   imports: [
     ConfigModule.forRoot({
