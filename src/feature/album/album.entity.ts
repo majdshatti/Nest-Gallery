@@ -1,4 +1,13 @@
-import { BaseEntity, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+// Typeorm
+import {
+  BaseEntity,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+} from 'typeorm';
+// Entity
+import { User } from '../user';
 
 @Entity()
 export class Album extends BaseEntity {
@@ -16,4 +25,7 @@ export class Album extends BaseEntity {
 
   @Column()
   image: string;
+
+  @ManyToOne(() => User, (user) => user.albums)
+  user: User;
 }
