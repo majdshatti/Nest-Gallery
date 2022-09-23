@@ -11,5 +11,5 @@ export class FilterAlbumDto {
 
   @IsOptional()
   @IsNotEmpty()
-  isPrivate: boolean;
+  type: string;
 }
