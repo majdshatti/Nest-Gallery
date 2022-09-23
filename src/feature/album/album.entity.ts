@@ -28,4 +28,7 @@ export class Album extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.albums)
   user: User;
+
+  @Column()
+  userId: number;
 }
