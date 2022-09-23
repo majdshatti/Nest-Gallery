@@ -1,4 +1,4 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty } from 'class-validator';
 
 export class CreateAlbumDto {
   @IsNotEmpty()
@@ -8,8 +8,7 @@ export class CreateAlbumDto {
   description: string;
 
   @IsNotEmpty()
-  isPrivate: boolean;
-  
-  @IsNotEmpty()
-  image: string;
+  isPrivate: string;
+
+  image: Express.Multer.File;
 }
