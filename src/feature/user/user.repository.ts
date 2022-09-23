@@ -25,7 +25,11 @@ export const UserRepositroy = AppDataSource.manager.getRepository(User).extend({
     user.password = await bcrypt.hash(registerUserDto.password, salt);
     user.email = registerUserDto.email;
 
-    return user.save();
+    await user.save();
+
+    delete user.password;
+
+    return user;
   },
 
   /**
@@ -35,6 +39,9 @@ export const UserRepositroy = AppDataSource.manager.getRepository(User).extend({
    * @returns Promise<User>
    */
   async getUserByUsername(username: string): Promise<User> {
-    return await this.findOneBy({ username });
+    return await this.createQueryBuilder('user')
+      .select('user.username', username)
+      .addSelect('user.password')
+      .getOne();
   },
 });
