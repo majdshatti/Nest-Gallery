@@ -1,30 +1,24 @@
 // Typeorm
-import {
-  BaseEntity,
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  Unique,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, Unique, OneToMany } from 'typeorm';
 // Utility
 import * as bcrypt from 'bcrypt';
 // Entity
 import { Album } from '../album';
+import { FeatureEntity } from '../feature.entity';
+// Serialization
+import { Exclude, Expose } from 'class-transformer';
 
 @Entity()
 @Unique(['username', 'email'])
-export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class User extends FeatureEntity {
   @Column()
   username: string;
 
   @Column()
   email: string;
 
-  @Column({ select: false })
+  @Column()
+  @Exclude()
   password: string;
 
   @OneToMany(() => Album, (album) => album.user)
