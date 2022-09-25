@@ -5,6 +5,8 @@ import { User } from '../user';
 import { Album } from './album.entity';
 // Data transfer objects
 import { CreateAlbumDto, UpdateAlbumDto, FilterAlbumDto } from './dto/';
+// Utilites
+import { v4 as uuid } from 'uuid';
 
 export const AlbumRepository = AppDataSource.manager
   .getRepository(Album)
@@ -61,6 +63,7 @@ export const AlbumRepository = AppDataSource.manager
 
       const album = new Album();
 
+      album._id = uuid();
       album.name = name;
       album.description = description;
       album.isPrivate = parseInt(isPrivate, 10) == 1 ? true : false;
