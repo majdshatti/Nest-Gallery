@@ -1,19 +1,12 @@
 // Typeorm
-import {
-  BaseEntity,
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, Column, ManyToOne } from 'typeorm';
 // Entity
 import { User } from '../user';
+// Serialization
+import { FeatureEntity } from '../feature.entity';
 
 @Entity()
-export class Album extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Album extends FeatureEntity {
   @Column()
   name: string;
 
