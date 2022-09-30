@@ -6,15 +6,24 @@ export const filter = <T>(
   repository: Repository<T>,
   options: IFilterOptions,
 ) => {
-  const { sortableColmuns, defaultSortBy } = options;
+  const { sortableColumns, defaultSortBy, searchableColumns } = options;
 
   const tableAlias = repository.metadata.tableName;
 
   /** Initing query builder */
   let queryBuilder = repository.createQueryBuilder(tableAlias);
 
+  /** Search */
+  if (queries.search && searchableColumns?.length > 0) {
+    for (const col of searchableColumns) {
+      queryBuilder.orWhere(`${tableAlias}.${col} LIKE :${col}`, {
+        [col]: `%${queries.search}%`,
+      });
+    }
+  }
+
   /** Sorting */
-  if (queries.sortBy?.length > 0 && sortableColmuns) {
+  if (queries.sortBy?.length > 0 && sortableColumns) {
     //* NOTE: taking only first tuple of query sorting params
     //* Example: ?sortBy=name:DESC --> ['name', 'DESC'] is what being taken
     const sortBy: string[] = queries.sortBy[0];
@@ -22,7 +31,7 @@ export const filter = <T>(
     const sortField: string = sortBy[0];
     // sortMethod only accepts DESC/ASC values
     const sortMethod: 'DESC' | 'ASC' = sortBy[1] === 'ASC' ? 'ASC' : 'DESC';
-    if (sortableColmuns.includes(sortField)) {
+    if (sortableColumns.includes(sortField)) {
       queryBuilder.orderBy(tableAlias + '.' + sortField, sortMethod);
     }
   }
