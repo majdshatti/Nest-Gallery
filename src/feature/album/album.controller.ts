@@ -11,15 +11,31 @@ import {
   Put,
   Delete,
   Query,
+  UseInterceptors,
   UseGuards,
+  UploadedFile,
 } from '@nestjs/common';
+
 import { AuthGuard } from '@nestjs/passport';
 // Services
 import { AlbumService } from './album.service';
 // Entity
 import { Album } from './album.entity';
+import { User } from '../user';
 // Data Transfar Objects
 import { CreateAlbumDto, UpdateAlbumDto, FilterAlbumDto } from './dto';
+// Decorator
+import { GetUser } from 'src/common/decorators/get-user.decorators';
+// File Interceptor
+import { FileInterceptor } from '@nestjs/platform-express';
+//
+import {
+  FilterOperator,
+  Paginate,
+  PaginateQuery,
+  paginate,
+  Paginated,
+} from 'nestjs-paginate';
 
 /**
  * Album Controller
@@ -39,10 +55,8 @@ export class AlbumController {
    * @returns //TODO
    */
   @Get()
-  getAlbums(
-    @Query(ValidationPipe) filterAlbumDto: FilterAlbumDto,
-  ): Promise<Album[]> {
-    return this.albumService.getAlbums(filterAlbumDto);
+  getAlbums(@Paginate() query: FilterAlbumDto, @GetUser() user: User) {
+    return this.albumService.getAlbums(query, user);
   }
 
   /**
@@ -53,8 +67,11 @@ export class AlbumController {
    * @returns //TODO
    */
   @Get('/:id')
-  getAlbumById(@Param('id', ParseIntPipe) id: number): Promise<Album> {
-    return this.albumService.getAlbumById(id);
+  getAlbumById(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<Album> {
+    return this.albumService.getAlbumById(id, user);
   }
 
   /**
@@ -62,12 +79,19 @@ export class AlbumController {
    *
    * @route POST /album
    * @param body CreateAlbumDto
+   * @param user User
    * @returns //TODO
    */
   @Post()
   @UsePipes(ValidationPipe)
-  createAlbum(@Body() body: CreateAlbumDto): Promise<Album> {
-    return this.albumService.createAlbum(body);
+  @UseInterceptors(FileInterceptor('image'))
+  createAlbum(
+    @Body() createAlbumDto: CreateAlbumDto,
+    @GetUser() user: User,
+    @UploadedFile() image: Express.Multer.File,
+  ): Promise<Album> {
+    createAlbumDto.image = image;
+    return this.albumService.createAlbum(createAlbumDto, user);
   }
 
   /**
@@ -82,8 +106,9 @@ export class AlbumController {
   updateAlbum(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateAlbumDto,
+    @GetUser() user: User,
   ): Promise<Album> {
-    return this.albumService.updateAlbum(id, body);
+    return this.albumService.updateAlbum(id, body, user);
   }
 
   /**
@@ -94,7 +119,10 @@ export class AlbumController {
    * @returns //TODO
    */
   @Delete('/:id')
-  deleteAlbum(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.albumService.deleteAlbum(id);
+  deleteAlbum(
+    @Param('id', ParseIntPipe) id: number,
+    @GetUser() user: User,
+  ): Promise<void> {
+    return this.albumService.deleteAlbum(id, user);
   }
 }
