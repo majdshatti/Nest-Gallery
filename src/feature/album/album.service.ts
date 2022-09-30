@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { filter } from 'src/common/helper/filter';
+import { Repository } from 'typeorm';
 import { User } from '../user';
 // Entity
 import { Album } from './album.entity';
@@ -7,15 +9,33 @@ import { Album } from './album.entity';
 import { AlbumRepository } from './album.repository';
 // Data Transfer Objects
 import { CreateAlbumDto, FilterAlbumDto, UpdateAlbumDto } from './dto';
+// Pagination and Filtering
+// import {
+//   FilterOperator,
+//   Paginate,
+//   PaginateQuery,
+//   paginate,
+//   Paginated,
+// } from 'nestjs-paginate';
 
 @Injectable()
 export class AlbumService {
-  async getAlbums(
-    filterAlbumDto: FilterAlbumDto,
-    user: User,
-  ): Promise<Album[]> {
-    return await AlbumRepository.getAlbums(filterAlbumDto, user);
+  async getAlbums(query: FilterAlbumDto, user: User) {
+    return filter(query, AlbumRepository, {
+      sortableColmuns: ['name', 'createdAt'],
+      defaultSortBy: [['createdAt', 'DESC']],
+    });
   }
+
+  // async getAlbums(query: PaginateQuery, user: User): Promise<Paginated<Album>> {
+  //   return paginate(query, AlbumRepository, {
+  //     sortableColumns: ['name'],
+  //     nullSort: 'last',
+  //     searchableColumns: ['name'],
+  //     defaultSortBy: [['createdAt', 'DESC']],
+  //     filterableColumns: {},
+  //   });
+  // }
 
   async getAlbumById(id: number, user: User): Promise<Album> {
     const album = await AlbumRepository.findOne({
