@@ -1,7 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { filter } from 'src/common/helper/filter';
-import { Repository } from 'typeorm';
 import { User } from '../user';
 // Entity
 import { Album } from './album.entity';
@@ -22,7 +20,8 @@ import { CreateAlbumDto, FilterAlbumDto, UpdateAlbumDto } from './dto';
 export class AlbumService {
   async getAlbums(query: FilterAlbumDto, user: User) {
     return filter(query, AlbumRepository, {
-      sortableColmuns: ['name', 'createdAt'],
+      sortableColumns: ['name', 'createdAt'],
+      searchableColumns: ['name', 'description'],
       defaultSortBy: [['createdAt', 'DESC']],
     });
   }
