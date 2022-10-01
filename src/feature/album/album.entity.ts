@@ -4,6 +4,7 @@ import { Entity, Column, ManyToOne } from 'typeorm';
 import { User } from '../user';
 // Serialization
 import { FeatureEntity } from '../feature.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Album extends FeatureEntity {
@@ -19,9 +20,10 @@ export class Album extends FeatureEntity {
   @Column()
   image: string;
 
-  @ManyToOne(() => User, (user) => user.albums)
+  @ManyToOne(() => User, (user) => user.albums, { eager: true })
   user: User;
 
   @Column()
+  @Exclude()
   userId: number;
 }
