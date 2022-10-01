@@ -9,4 +9,6 @@ export interface IFilterOptions {
   searchableColumns?: string[];
   defaultSortBy?: [[string, 'DESC' | 'ASC']];
   filterableColumns?: IFilterableColumnsObject;
+  withRelations?: string[];
+  selectFields?: string[];
 }
