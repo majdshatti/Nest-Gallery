@@ -4,6 +4,11 @@ interface IFilterableColumnsObject {
   [key: string]: FilterOperator;
 }
 
+interface IPaginate {
+  skip?: number;
+  limit: number;
+}
+
 export interface IFilterOptions {
   sortableColumns?: string[];
   searchableColumns?: string[];
@@ -11,4 +16,5 @@ export interface IFilterOptions {
   filterableColumns?: IFilterableColumnsObject;
   withRelations?: string[];
   selectFields?: string[];
+  paginate?: IPaginate;
 }

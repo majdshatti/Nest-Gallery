@@ -13,6 +13,7 @@ export const filter = <T>(
     searchableColumns,
     withRelations,
     selectFields,
+    paginate,
   } = options;
 
   const tableAlias = repository.metadata.tableName;
@@ -90,5 +91,14 @@ export const filter = <T>(
 
     queryBuilder.orderBy(tableAlias + '.' + sortField, sortMethod);
   }
+
+  /** Pagination */
+  if (paginate) {
+    queryBuilder.take(paginate.limit);
+    if (queries.page) {
+      queryBuilder.skip(queries.page - 1);
+    }
+  }
+
   return queryBuilder.getMany();
 };
