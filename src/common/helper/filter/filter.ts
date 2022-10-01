@@ -7,7 +7,13 @@ export const filter = <T>(
   repository: Repository<T>,
   options: IFilterOptions,
 ) => {
-  const { sortableColumns, defaultSortBy, searchableColumns } = options;
+  const {
+    sortableColumns,
+    defaultSortBy,
+    searchableColumns,
+    withRelations,
+    selectFields,
+  } = options;
 
   const tableAlias = repository.metadata.tableName;
 
@@ -49,6 +55,18 @@ export const filter = <T>(
     }
   }
 
+  /** Relations */
+  if (withRelations?.length > 0) {
+    for (const relation of withRelations) {
+      queryBuilder.leftJoinAndSelect(`${tableAlias}.${relation}`, relation);
+    }
+  }
+
+  /** Select */
+  if (selectFields?.length > 0) {
+    queryBuilder.select(selectFields);
+  }
+
   /** Sorting */
   if (queries.sortBy?.length > 0 && sortableColumns) {
     //* NOTE: taking only first tuple of query sorting params
@@ -72,6 +90,5 @@ export const filter = <T>(
 
     queryBuilder.orderBy(tableAlias + '.' + sortField, sortMethod);
   }
-
   return queryBuilder.getMany();
 };
