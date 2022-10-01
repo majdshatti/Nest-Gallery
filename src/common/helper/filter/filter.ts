@@ -1,5 +1,6 @@
 import { Repository } from 'typeorm';
-import { IFilterOptions } from './';
+import { getOperatorValue, IFilterOptions } from './';
+import { getWhereStatement } from './helper/getWhereStatement.helper';
 
 export const filter = <T>(
   queries: any,
@@ -18,6 +19,32 @@ export const filter = <T>(
     for (const col of searchableColumns) {
       queryBuilder.orWhere(`${tableAlias}.${col} LIKE :${col}`, {
         [col]: `%${queries.search}%`,
+      });
+    }
+  }
+
+  /** Fields filtering */
+  if (queries.filter) {
+    for (const col in queries.filter) {
+      // Example: $gte:10, $in:smth,smth2
+      const queryFilter = queries.filter[col].split(':');
+      const operator = queryFilter[0];
+      let value = queryFilter[1];
+
+      let sqlOperator = getOperatorValue(operator);
+
+      if (!sqlOperator) continue;
+
+      if (sqlOperator === 'IN') {
+        value = value.split(',');
+      }
+
+      let sqlStatement = getWhereStatement(sqlOperator, col);
+
+      sqlStatement = tableAlias + '.' + sqlStatement;
+
+      queryBuilder.andWhere(sqlStatement, {
+        [col]: value,
       });
     }
   }
