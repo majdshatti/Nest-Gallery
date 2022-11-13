@@ -1,5 +1,5 @@
 import { FilterOperator } from '..';
-import { isObjKey } from 'src/common/utils/dataStructures/isObjectKey.helper';
+import { isObjKey } from 'src/common/utils';
 
 /**
  * Gets ($gte, $lt, ...etc) operators and returns its values (=>, <, ...etc)

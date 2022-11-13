@@ -8,7 +8,7 @@ import {
   QueryFilterDto,
 } from './';
 // Utils
-import { isObjKey } from 'src/common/utils/dataStructures/isObjectKey.helper';
+import { isObjKey } from 'src/common/utils/';
 
 export const filter = async <T>(
   queries: QueryFilterDto,
