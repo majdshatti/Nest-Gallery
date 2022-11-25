@@ -7,14 +7,17 @@ import {
 // Data Transfer Objects
 import { LoginUserDto, RegisterUserDto } from './dto';
 // Repository
-import { User, UserRepositroy } from '../user';
+import { User, UserRepository } from '../user';
 // JWT Service
 import { JwtService } from '@nestjs/jwt';
 import { IPayload } from './interfaces/payload.interface';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private userRepository: UserRepository,
+    private jwtService: JwtService,
+  ) {}
 
   /**
    * Register user into the db
@@ -23,7 +26,7 @@ export class AuthService {
    * @returns User: created user
    */
   async registerUser(registerUserDto: RegisterUserDto): Promise<User> {
-    return await UserRepositroy.createUser(registerUserDto);
+    return await this.userRepository.createUser(registerUserDto);
   }
 
   /**
@@ -38,7 +41,7 @@ export class AuthService {
     const { username, password } = loginUserDto;
 
     // Getting user by username
-    const user: User = await UserRepositroy.getUserByUsername(username);
+    const user: User = await this.userRepository.getUserByUsername(username);
 
     // Making sure if user is valied
     if (!user) throw new NotFoundException('Invalied Credentials');
