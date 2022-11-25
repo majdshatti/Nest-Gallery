@@ -1,7 +1,7 @@
 import { FilterOperator } from '../';
 
 interface IFilterableColumnsObject {
-  [key: string]: FilterOperator;
+  [key: string]: FilterOperator | FilterOperator[];
 }
 
 interface IFilterableRelationColumnsObject {
