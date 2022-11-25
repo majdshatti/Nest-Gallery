@@ -26,24 +26,29 @@ export const filter = async <T>(
     conditions,
   } = options;
 
-  const tableAlias = repository.metadata.tableName;
+  const albumAlias = repository.metadata.tableName;
 
   /** Initing query builder */
-  let queryBuilder = repository.createQueryBuilder(tableAlias);
+  let queryBuilder = repository.createQueryBuilder(albumAlias);
 
   /** Search */
   if (queries.search && searchableColumns?.length > 0) {
     for (const col of searchableColumns) {
-      queryBuilder.orWhere(`${tableAlias}.${col} LIKE :${col}`, {
-        [col]: `%${queries.search}%`,
-      });
+      const tableAlias = checkTableAlias(col, albumAlias, withRelations);
+
+      queryBuilder.orWhere(
+        `${tableAlias === 'album' ? 'album.' : ''}${col} LIKE :${col}`,
+        {
+          [col]: `%${queries.search}%`,
+        },
+      );
     }
   }
 
   /** Conditions */
   if (conditions) {
     for (const cond in conditions) {
-      queryBuilder.andWhere(`${tableAlias}.${cond} = :${cond}`, {
+      queryBuilder.andWhere(`${albumAlias}.${cond} = :${cond}`, {
         [cond]: `${conditions[cond]}`,
       });
     }
@@ -51,20 +56,9 @@ export const filter = async <T>(
 
   /** Fields filtering */
   if (queries.filter) {
-    let relationAlias;
-
     for (const col in queries.filter) {
       // Make sure that user does not pass any unexisted column
-      if (!isObjKey(col, filterableColumns)) {
-        continue;
-      }
-
-      // Check wether the table alias is a relation instead
-      if (col.includes('.')) {
-        if (withRelations.includes(col.split('.')[0])) {
-          relationAlias = col.split('.')[0];
-        }
-      }
+      if (!isObjKey(col, filterableColumns)) continue;
 
       // Example: $gte:10, $in:smth,smth2
       const queryFilter: string[] = queries.filter[col].split(':');
@@ -72,7 +66,7 @@ export const filter = async <T>(
       let value: string | string[] = queryFilter[1];
 
       // Convert $gte to >=
-      let sqlOperator = getOperatorValue(operator);
+      let sqlOperator = getOperatorValue(operator, filterableColumns[col]);
 
       if (!sqlOperator) continue;
 
@@ -81,8 +75,10 @@ export const filter = async <T>(
         value = value.split(',');
       }
 
+      const tableAlias = checkTableAlias(col, albumAlias, withRelations);
+
       const sqlStatement: string =
-        (!relationAlias ? tableAlias + '.' : '') +
+        (tableAlias === 'album' ? albumAlias + '.' : '') +
         getWhereStatement(sqlOperator, col);
 
       queryBuilder.andWhere(sqlStatement, {
@@ -90,11 +86,11 @@ export const filter = async <T>(
       });
     }
   }
-  console.log(queryBuilder.getQueryAndParameters());
+
   /** Relations */
   if (withRelations?.length > 0) {
     for (const relation of withRelations) {
-      queryBuilder.leftJoinAndSelect(`${tableAlias}.${relation}`, relation);
+      queryBuilder.leftJoinAndSelect(`${albumAlias}.${relation}`, relation);
     }
   }
 
@@ -112,8 +108,13 @@ export const filter = async <T>(
     // sortMethod only accepts DESC/ASC values
     const sortMethod: 'DESC' | 'ASC' = sortBy[1] === 'ASC' ? 'ASC' : 'DESC';
 
+    const tableAlias = checkTableAlias(sortField, albumAlias, withRelations);
+
     if (sortableColumns.includes(sortField)) {
-      queryBuilder.orderBy(tableAlias + '.' + sortField, sortMethod);
+      queryBuilder.orderBy(
+        (tableAlias === 'album' ? 'album.' : '') + sortField,
+        sortMethod,
+      );
     }
   }
 
@@ -124,7 +125,7 @@ export const filter = async <T>(
     // sortMethod only accepts DESC/ASC values
     sortMethod = sortMethod === 'ASC' ? 'ASC' : 'DESC';
 
-    queryBuilder.orderBy(tableAlias + '.' + sortField, sortMethod);
+    queryBuilder.orderBy(albumAlias + '.' + sortField, sortMethod);
   }
 
   /** Pagination */
@@ -173,4 +174,19 @@ export const filter = async <T>(
       previousPage,
     },
   };
+};
+
+const checkTableAlias = (
+  value: string,
+  tableAlias: string,
+  relations: string[],
+): string => {
+  if (!value.includes('.')) return tableAlias;
+
+  // Check wether the table alias is a relation instead
+  if (relations.includes(value.split('.')[0])) {
+    return '';
+  }
+
+  return tableAlias;
 };
