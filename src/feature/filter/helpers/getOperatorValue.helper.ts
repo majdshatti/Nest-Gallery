@@ -1,5 +1,5 @@
 import { FilterOperator } from '..';
-import { isObjKey } from 'src/common/utils';
+import { arrayify, isObjKey } from 'src/common/utils';
 
 /**
  * Gets ($gte, $lt, ...etc) operators and returns its values (=>, <, ...etc)
@@ -7,7 +7,12 @@ import { isObjKey } from 'src/common/utils';
  * @param operator string might hold the values $gte, $lte, ...etc
  * @returns string | boolean
  */
-export const getOperatorValue = (operator: string): string | false => {
+export const getOperatorValue = (
+  operator: string,
+  allowedOperators: string | string[],
+): string | false => {
+  allowedOperators = arrayify(allowedOperators);
+
   // operator passed by the url must starts with `$`
   if (operator[0] !== '$') return false;
 
@@ -17,6 +22,8 @@ export const getOperatorValue = (operator: string): string | false => {
   if (!isObjKey(operator, FilterOperator)) {
     return false;
   }
+
+  if (!allowedOperators.includes(FilterOperator[operator])) return false;
 
   return FilterOperator[operator];
 };
