@@ -1,43 +1,60 @@
+// Nest
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { filter } from 'src/common/helper/filter';
-import { User } from '../user';
 // Entity
+import { User } from '../user';
 import { Album } from './album.entity';
 // Repositoy
 import { AlbumRepository } from './album.repository';
 // Data Transfer Objects
 import { CreateAlbumDto, FilterAlbumDto, UpdateAlbumDto } from './dto';
-// Pagination and Filtering
-// import {
-//   FilterOperator,
-//   Paginate,
-//   PaginateQuery,
-//   paginate,
-//   Paginated,
-// } from 'nestjs-paginate';
+// Filter
+import { filter, FilterOperator, IFilterResult } from 'src/feature/filter';
 
 @Injectable()
 export class AlbumService {
-  async getAlbums(query: FilterAlbumDto, user: User) {
-    return filter(query, AlbumRepository, {
-      sortableColumns: ['name', 'createdAt'],
-      searchableColumns: ['name', 'description'],
+  constructor(private albumRepository: AlbumRepository) {}
+
+  /**
+   * Retures a list of non/filtered albums
+   *
+   * @param query FilterAlbumDto
+   * @param user logged in user
+   *
+   * @returns list of albums
+   */
+  async getAlbums(query: FilterAlbumDto, user: User): Promise<IFilterResult> {
+    return filter<Album>(query, this.albumRepository, {
+      withRelations: ['user'],
+      sortableColumns: ['name', 'createdAt', 'user.username'],
+      searchableColumns: ['name', 'description', 'user.username'],
       defaultSortBy: [['createdAt', 'DESC']],
+      filterableColumns: {
+        name: [FilterOperator.LIKE, FilterOperator.EQ],
+        'user.username': [FilterOperator.LIKE, FilterOperator.EQ],
+      },
+      conditions: {
+        userId: user.id,
+      },
+      selectFields: [
+        'album.id',
+        'album._id',
+        'album.name',
+        'album.isPrivate',
+        'album.createdAt',
+        'album.updatedAt',
+        'album.image',
+        'user.id',
+        'user._id',
+        'user.username',
+      ],
+      paginate: {
+        limit: 10,
+      },
     });
   }
 
-  // async getAlbums(query: PaginateQuery, user: User): Promise<Paginated<Album>> {
-  //   return paginate(query, AlbumRepository, {
-  //     sortableColumns: ['name'],
-  //     nullSort: 'last',
-  //     searchableColumns: ['name'],
-  //     defaultSortBy: [['createdAt', 'DESC']],
-  //     filterableColumns: {},
-  //   });
-  // }
-
   async getAlbumById(id: number, user: User): Promise<Album> {
-    const album = await AlbumRepository.findOne({
+    const album = await this.albumRepository.findOne({
       where: { id, userId: user.id },
     });
 
@@ -52,7 +69,7 @@ export class AlbumService {
     createAlbumDto: CreateAlbumDto,
     user: User,
   ): Promise<Album> {
-    return AlbumRepository.createAlbum(createAlbumDto, user);
+    return this.albumRepository.createAlbum(createAlbumDto, user);
   }
 
   async updateAlbum(
@@ -62,11 +79,11 @@ export class AlbumService {
   ): Promise<Album> {
     const album = await this.getAlbumById(id, user);
 
-    return AlbumRepository.updateAlbum(album, body);
+    return this.albumRepository.updateAlbum(album, body);
   }
 
   async deleteAlbum(id: number, user: User): Promise<void> {
-    const results = await AlbumRepository.delete({ id, userId: user.id });
+    const results = await this.albumRepository.delete({ id, userId: user.id });
 
     if (results.affected === 0) {
       throw new NotFoundException(`${id} does not exist.`);
