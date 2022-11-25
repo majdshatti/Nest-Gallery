@@ -4,19 +4,16 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
+import { WinstonServices } from '../services/winston/winston.service';
+//
 import { ValidationRequestException } from './bad-request-validation.exception';
 
 @Catch()
 export class AppExceptionHandler implements ExceptionFilter {
-  logger: Logger;
+  private logger: WinstonServices = new WinstonServices();
 
-  constructor() {
-    this.logger = new Logger();
-  }
-
-  catch(exception: unknown, host: ArgumentsHost): void {
+  catch(exception: any, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
 
@@ -24,7 +21,7 @@ export class AppExceptionHandler implements ExceptionFilter {
     const exceptionMessage: string = this.getExceptionMessage(exception);
     const exceptionError: Object = this.getExceptionError(exception);
 
-    this.logger.error(exception);
+    this.logger.error(exception.stack);
 
     response.status(httpStatus).json({
       success: false,
