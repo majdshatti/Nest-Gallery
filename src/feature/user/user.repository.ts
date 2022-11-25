@@ -1,5 +1,3 @@
-// Database App dataSource
-import { AppDataSource } from 'src/database/dataSource';
 // Data Transfer Object
 import { RegisterUserDto } from '../auth/dto';
 // Entity
@@ -7,8 +5,14 @@ import { User } from './user.entity';
 // Utilities
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
+import { Repository, DataSource } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 
-export const UserRepositroy = AppDataSource.manager.getRepository(User).extend({
+@Injectable()
+export class UserRepository extends Repository<User> {
+  constructor(private dataSource: DataSource) {
+    super(User, dataSource.createEntityManager());
+  }
   /**
    * Create user by register dto
    *
@@ -30,7 +34,7 @@ export const UserRepositroy = AppDataSource.manager.getRepository(User).extend({
     await user.save();
 
     return user;
-  },
+  }
 
   /**
    * Get a user by username
@@ -40,5 +44,5 @@ export const UserRepositroy = AppDataSource.manager.getRepository(User).extend({
    */
   async getUserByUsername(username: string): Promise<User> {
     return await this.findOneBy({ username });
-  },
-});
+  }
+}
