@@ -1,4 +1,4 @@
-import { UserRepositroy } from './user.repository';
+import { UserRepository } from './user.repository';
 import { User } from './user.entity';
 
-export { UserRepositroy, User };
+export { UserRepository, User };
