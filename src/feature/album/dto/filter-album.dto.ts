@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { FilterDto } from 'src/common/helper/filter';
+import { QueryFilterDto } from 'src/feature/filter';
 
-export class FilterAlbumDto extends FilterDto {
+export class FilterAlbumDto extends QueryFilterDto {
   @IsOptional()
   @IsNotEmpty()
   name: string;
