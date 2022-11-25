@@ -10,32 +10,26 @@ import {
   ValidationPipe,
   Put,
   Delete,
-  Query,
   UseInterceptors,
   UseGuards,
   UploadedFile,
 } from '@nestjs/common';
-
+// Guard
 import { AuthGuard } from '@nestjs/passport';
 // Services
 import { AlbumService } from './album.service';
 // Entity
-import { Album } from './album.entity';
+import { Album } from './';
 import { User } from '../user';
 // Data Transfar Objects
 import { CreateAlbumDto, UpdateAlbumDto, FilterAlbumDto } from './dto';
-// Decorator
+// Decorator & Pipes
 import { GetUser } from 'src/common/decorators/get-user.decorators';
+import { ImageOptimizerPipe } from 'src/common/pipes/image-optimizer.pipe';
 // File Interceptor
 import { FileInterceptor } from '@nestjs/platform-express';
-//
-import {
-  FilterOperator,
-  Paginate,
-  PaginateQuery,
-  paginate,
-  Paginated,
-} from 'nestjs-paginate';
+// Filter
+import { FilterDecorator, IFilterResult } from '../filter';
 
 /**
  * Album Controller
@@ -52,10 +46,13 @@ export class AlbumController {
    *
    * @route GET /album
    * @param filterAlbumDto FilterAlbumDto
-   * @returns //TODO
+   * @returns list of albums
    */
   @Get()
-  getAlbums(@Paginate() query: FilterAlbumDto, @GetUser() user: User) {
+  getAlbums(
+    @FilterDecorator() query: FilterAlbumDto,
+    @GetUser() user: User,
+  ): Promise<IFilterResult> {
     return this.albumService.getAlbums(query, user);
   }
 
@@ -64,7 +61,7 @@ export class AlbumController {
    *
    * @route GET /album/:id
    * @param id id from the url param
-   * @returns //TODO
+   * @returns album of a specified id
    */
   @Get('/:id')
   getAlbumById(
@@ -80,7 +77,8 @@ export class AlbumController {
    * @route POST /album
    * @param body CreateAlbumDto
    * @param user User
-   * @returns //TODO
+   *
+   * @returns created album
    */
   @Post()
   @UsePipes(ValidationPipe)
@@ -88,7 +86,7 @@ export class AlbumController {
   createAlbum(
     @Body() createAlbumDto: CreateAlbumDto,
     @GetUser() user: User,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile(ImageOptimizerPipe) image: Express.Multer.File,
   ): Promise<Album> {
     createAlbumDto.image = image;
     return this.albumService.createAlbum(createAlbumDto, user);
@@ -100,7 +98,7 @@ export class AlbumController {
    * @route PUT /album/:id
    * @param id id from the url param
    * @param updateAlbumDto UpdateAlbumDto
-   * @returns //TODO
+   * @returns updated album
    */
   @Put('/:id')
   updateAlbum(
@@ -116,7 +114,7 @@ export class AlbumController {
    *
    * @route DELETE /album/:id
    * @param id id from the url param
-   * @returns //TODO
+   * @returns // TODO
    */
   @Delete('/:id')
   deleteAlbum(
