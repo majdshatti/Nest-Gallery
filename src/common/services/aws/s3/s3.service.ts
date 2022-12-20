@@ -16,13 +16,38 @@ export class S3Service {
     this.bucketName = process.env.AWS_BUCKET_NAME;
   }
 
-  uploadFile = (file: Express.Multer.File, path: string) => {
+  /**
+   * Uploads a file to s3 bucket
+   * 
+   * @param file Multer file
+   * @param path the path of the object to be created or to be updated
+   * @param flag marks if it's updating process
+   * 
+   * @returns S3.ManagedUpload.SendData
+   */
+  uploadFile = (file: Express.Multer.File, path: string, flag?: 'update') => {
     return this.s3
       .upload({
         Bucket: this.bucketName,
         Body: file.buffer,
-        Key: `${path}/` + file.originalname,
+        Key: flag === 'update' ? path : (path + '/' + file.originalname),
       })
       .promise();
   };
+
+  /**
+   * Deletes and object from aws s3 bucket
+   * 
+   * @param path the path of desired file
+   * 
+   * @returns PromiseResult<S3.DeleteObjectOutput, AWSError>
+   */
+  deleteFile = (path: string) => {
+    return this.s3
+      .deleteObject({
+        Bucket: this.bucketName,
+        Key: path,
+      })
+      .promise();
+  }
 }
