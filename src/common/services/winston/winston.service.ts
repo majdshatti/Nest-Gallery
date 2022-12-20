@@ -16,10 +16,6 @@ export class WinstonServices {
           level: 'error',
           filename: `src/logs/error/${this.dateString}.log`,
         }),
-        new winston.transports.File({
-          level: 'warn',
-          filename: `src/logs/warn/${this.dateString}.log`,
-        }),
         new winston.transports.Console({
           level: 'info',
           format: winston.format.combine(
