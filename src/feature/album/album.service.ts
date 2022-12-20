@@ -10,6 +10,10 @@ import { CreateAlbumDto, FilterAlbumDto, UpdateAlbumDto } from './dto';
 // Filter
 import { filter, FilterOperator, IFilterResult } from 'src/feature/filter';
 
+// Utilites
+import { v4 as uuid } from 'uuid';
+import { S3Service } from 'src/common/services/aws/s3/s3.service';
+
 @Injectable()
 export class AlbumService {
   constructor(private albumRepository: AlbumRepository) {}
@@ -53,40 +57,115 @@ export class AlbumService {
     });
   }
 
-  async getAlbumById(id: number, user: User): Promise<Album> {
+  /**
+   * Gets a single album by id
+   *
+   * @param id uuid
+   * @param user logged in user
+   *
+   * @returns album
+   */
+  async getUserAlbumByUuid(id: string, user: User): Promise<Album> {
     const album = await this.albumRepository.findOne({
-      where: { id, userId: user.id },
+      where: { _id: id, userId: user.id },
     });
 
-    if (!album) {
-      throw new NotFoundException(`${id} does not exist.`);
-    }
+    if (!album) throw new NotFoundException(`${id} does not exist.`);
 
     return album;
   }
 
+  /**
+   * Stores an album and uploads its image to the aws bucket
+   *
+   * @param createAlbumDto CreateAlbumDto
+   * @param user logged in user
+   *
+   * @returns album
+   */
   async createAlbum(
     createAlbumDto: CreateAlbumDto,
     user: User,
   ): Promise<Album> {
-    return this.albumRepository.createAlbum(createAlbumDto, user);
+    const s3Service = new S3Service();
+    const s3ObjectPath = `users/${user.username}/album`;
+
+    const { name, description, isPrivate, image } = createAlbumDto;
+    const album = new Album();
+
+    album._id = uuid();
+    album.name = name;
+    album.description = description;
+    album.isPrivate = parseInt(isPrivate, 10) == 1 ? true : false;
+    album.userId = user.id;
+    album.image = (await s3Service.uploadFile(image, s3ObjectPath)).Location;
+
+    this.albumRepository.createAlbum(album);
+
+    return album;
   }
 
+  /**
+   * Updates an album
+   *
+   * @param id uuid
+   * @param updateAlbum UpdateAlbumDto
+   * @param user logged in user
+   *
+   * @returns album
+   */
   async updateAlbum(
-    id: number,
-    body: UpdateAlbumDto,
+    id: string,
+    updateAlbumDto: UpdateAlbumDto,
     user: User,
   ): Promise<Album> {
-    const album = await this.getAlbumById(id, user);
+    const s3Service = new S3Service();
+    const s3ObjectPath = `users/${user.username}/album`;
+    
+    const { name, description, isPrivate, image } = updateAlbumDto;
+    const album = await this.getUserAlbumByUuid(id, user);
+    
+    const imageName = album.image.split('/').pop();
+    const path = s3ObjectPath + '/' + imageName;
 
-    return this.albumRepository.updateAlbum(album, body);
+    album.name = name ?? album.name;
+    album.description = description ?? album.description;
+    album.isPrivate = (parseInt(isPrivate, 10) == 1 ? true : false) ?? album.isPrivate;
+
+    // Update image if exist in the request
+    if(image)
+      await s3Service.uploadFile(image, path, 'update');
+
+    return this.albumRepository.updateAlbum(album, updateAlbumDto);
   }
 
-  async deleteAlbum(id: number, user: User): Promise<void> {
-    const results = await this.albumRepository.delete({ id, userId: user.id });
+  /**
+   * Deletes an album
+   *
+   * @param id uuid
+   * @param user logged in user
+   *
+   * @returns album
+   */
+  async deleteAlbum(id: string, user: User): Promise<{message: string}> {
+    const s3Service = new S3Service();
+    const s3ObjectPath = `users/${user.username}/album`;
+
+    const album = await this.getUserAlbumByUuid(id, user);
+  
+    const results = await this.albumRepository.delete({ _id: id, userId: user.id });
 
     if (results.affected === 0) {
       throw new NotFoundException(`${id} does not exist.`);
+    }
+
+    const imageName = album.image.split('/').pop();
+    const path = s3ObjectPath + '/' + imageName;
+    
+    s3Service.deleteFile(path);
+
+    return {
+      message: `${album.name} is deleted successfully`
     }
   }
 }
