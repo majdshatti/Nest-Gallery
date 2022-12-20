@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   UsePipes,
-  ParseIntPipe,
   ValidationPipe,
   Put,
   Delete,
@@ -64,11 +63,11 @@ export class AlbumController {
    * @returns album of a specified id
    */
   @Get('/:id')
-  getAlbumById(
-    @Param('id', ParseIntPipe) id: number,
+  getAlbumByUuid(
+    @Param('id') id: string,
     @GetUser() user: User,
   ): Promise<Album> {
-    return this.albumService.getAlbumById(id, user);
+    return this.albumService.getUserAlbumByUuid(id, user);
   }
 
   /**
@@ -101,12 +100,16 @@ export class AlbumController {
    * @returns updated album
    */
   @Put('/:id')
+  @UsePipes(ValidationPipe)
+  @UseInterceptors(FileInterceptor('image'))
   updateAlbum(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateAlbumDto,
+    @Param('id') id: string,
+    @Body() updateAlbumDto: UpdateAlbumDto,
     @GetUser() user: User,
+    @UploadedFile(ImageOptimizerPipe) image: Express.Multer.File,
   ): Promise<Album> {
-    return this.albumService.updateAlbum(id, body, user);
+    updateAlbumDto.image = image;
+    return this.albumService.updateAlbum(id, updateAlbumDto, user);
   }
 
   /**
@@ -114,13 +117,13 @@ export class AlbumController {
    *
    * @route DELETE /album/:id
    * @param id id from the url param
-   * @returns // TODO
+   * @returns void
    */
   @Delete('/:id')
   deleteAlbum(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @GetUser() user: User,
-  ): Promise<void> {
+  ): Promise<{message: string}> {
     return this.albumService.deleteAlbum(id, user);
   }
 }
