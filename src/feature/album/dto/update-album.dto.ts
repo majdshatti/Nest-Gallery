@@ -11,9 +11,7 @@ export class UpdateAlbumDto {
 
   @IsOptional()
   @IsNotEmpty()
-  isPrivate: boolean;
+  isPrivate: string;
 
-  @IsOptional()
-  @IsNotEmpty()
-  image: string;
+  image: Express.Multer.File;
 }
