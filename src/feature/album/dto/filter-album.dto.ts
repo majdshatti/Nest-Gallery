@@ -8,9 +8,5 @@ export class FilterAlbumDto extends QueryFilterDto {
 
   @IsOptional()
   @IsNotEmpty()
-  search: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  type: string;
+  description: string;
 }
